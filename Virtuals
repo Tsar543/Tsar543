@@ -1,0 +1,53 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from xgboost import XGBClassifier
+from sklearn.metrics import accuracy_score
+
+# Sample Data Preprocessing
+def preprocess_data(matches):
+    # Convert home and away team results to numerical features
+    matches['home_goals'] = matches['home_score'].apply(lambda x: int(x.split('-')[0]))
+    matches['away_goals'] = matches['away_score'].apply(lambda x: int(x.split('-')[1]))
+    
+    # Calculate the result (Win: 1, Draw: 0, Loss: -1) for the home team
+    matches['home_result'] = np.where(matches['home_goals'] > matches['away_goals'], 1, 
+                                       np.where(matches['home_goals'] < matches['away_goals'], -1, 0))
+    
+    # Create other relevant features based on previous games or other attributes
+    matches['total_goals'] = matches['home_goals'] + matches['away_goals']
+    matches['over_2_5'] = np.where(matches['total_goals'] > 2.5, 1, 0)
+    
+    return matches
+
+# Sample dataset structure (based on the data you provided)
+data = {
+    'home_team': ['CRY', 'IPS', 'IPS', 'IPS', 'CHE', 'BOU', 'LIV', 'IPS', 'IPS', 'IPS'],
+    'away_team': ['IPS', 'LEI', 'EVE', 'ARS', 'IPS', 'IPS', 'IPS', 'WOL', 'AST', 'SOU'],
+    'home_score': ['2-0', '1-1', '0-0', '1-1', '1-0', '0-1', '1-0', '0-0', '2-0', '0-0'],
+    'away_score': ['2-2', '2-1', '1-0', '1-1', '1-0', '1-1', '4-1', '0-2', '3-0', '2-2']
+}
+
+# Creating DataFrame from sample data
+df = pd.DataFrame(data)
+
+# Preprocess the match data
+df = preprocess_data(df)
+
+# Features (X) and Target (y)
+X = df[['home_goals', 'away_goals', 'total_goals']]  # Example features
+y = df['home_result']  # Target: Home team result (Win/Draw/Loss)
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train XGBoost model
+model = XGBClassifier()
+model.fit(X_train, y_train)
+
+# Make predictions and evaluate the model
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+
+print(f'Model accuracy: {accuracy * 100:.2f}%')
+
