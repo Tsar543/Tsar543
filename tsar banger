@@ -1,0 +1,25 @@
+#include <stdio.h>
+
+int main() {
+    printf("Program to predict over 2.5 goals in football\n");
+    printf("You'll enter one team for three consecutive scores\n");
+
+    int total = 0; // Initialize total to 0
+    int score;
+
+    for (int i = 0; i < 3; i++) {
+        printf("Enter total score for game %d: ", i + 1);
+        scanf("%d", &score);
+        total += score; // Accumulate the total score
+    }
+
+    // Check if total score is greater than or equal to 3 (over 2.5 goals)
+    if (total > 8.5) {
+        printf("Making over 2.5 goals\n");
+    } else {
+        printf("Can't make over 2.5 goals\n");
+    }
+
+    return 0;
+}
+	
